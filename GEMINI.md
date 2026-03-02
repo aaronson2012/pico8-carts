@@ -2,7 +2,7 @@
 
 > This file provides project-specific instructions and context for AI coding agents working on PICO-8 games. **Read and follow every rule in this file. Violations are unacceptable.**
 >
-> **📝 LIVING DOCUMENT:** This file is a living reference. When you discover critical findings — undocumented API behavior, new pitfalls, corrected assumptions, or better patterns — you **MUST** update this file immediately. Keep it accurate and current. If something in this file is wrong, fix it and note the correction.
+> **📝 LIVING DOCUMENT:** This file (`./GEMINI.md`) is a living reference. When you discover critical findings — undocumented API behavior, new pitfalls, corrected assumptions, or better patterns — you **MUST** update this file immediately. Keep it accurate and current. If something in this file is wrong, fix it and note the correction.
 
 ---
 
@@ -110,7 +110,7 @@ project/
 
 ### What PICO-8 Lua DOES Have (Standard Lua Features That Work)
 - ✅ `pairs(tbl)` — iterate all key-value pairs (order not guaranteed)
-- ✅ `ipairs(tbl)` — iterate sequential integer-keyed entries in order
+- ✅ `ipairs(tbl)` — iterate sequential integer-keyed entries in order (**note:** works in practice but not listed in the official PICO-8 manual; prefer `all()` or `pairs()` for guaranteed compatibility)
 - ✅ `#tbl` — length operator for 1-based sequential tables
 - ✅ `unpack(tbl, [i], [j])` — unpack table values into multiple returns
 - ✅ `select(idx, ...)` — select from variadic arguments (`select("#",...)` for count)
@@ -119,7 +119,17 @@ project/
 - ✅ `rawset()`, `rawget()`, `rawequal()`, `rawlen()` — bypass metamethods
 - ✅ Variadic functions with `...` syntax
 - ✅ `goto` / `::label::` — unconditional jumps (used for custom main loops: `::_:: ... goto _`)
-- ✅ `table.sort(tbl, [comp])` — in-place sort with optional comparison function (works as in standard Lua)
+- ⚠️ `table.sort(tbl, [comp])` — **NOT listed in official PICO-8 manual** (works in some versions but not guaranteed). If unavailable, implement a manual sort:
+  ```lua
+  -- simple insertion sort (token-cheap)
+  function isort(t,cmp)
+   for i=2,#t do
+    local j,v=i,t[i]
+    while j>1 and (cmp and cmp(v,t[j-1]) or v<t[j-1]) do t[j]=t[j-1] j-=1 end
+    t[j]=v
+   end
+  end
+  ```
 
 ### What PICO-8 Lua DOES Have (Unique Extensions)
 - ✅ `+=`, `-=`, `*=`, `/=`, `%=`, `..=` and bitwise (`&=`, `|=`, etc.) compound assignment operators
@@ -127,14 +137,15 @@ project/
 - ✅ `\` integer division operator — `9\2` → `4` (equivalent to `flr(9/2)`)
 - ✅ `?` as shorthand for `print` — `?"hello"` instead of `print("hello")`
 - ✅ Single-line `if` shorthand — `if (cond) stmt1 stmt2` (parentheses required, no `then`/`end`)
+- ✅ Multiline `if` shorthand — `if (cond) do ... end` (saves 1 token vs `if cond then ... end`, v0.2.6+)
 - ✅ Single-line `while` shorthand — `while (cond) stmt` (parentheses required, no `do`/`end`)
-- ✅ `print(str, x, y, col)` — built-in text rendering with P8SCII control codes
+- ✅ `print(str, x, y, col)` — built-in text rendering with P8SCII control codes (see P8SCII reference below). Standard chars are **4px wide × 6px tall** (incl. 1px spacing); wide chars (128-255) are **8px wide**.
 - ✅ `add(tbl, val, [idx])` / `del(tbl, val)` / `deli(tbl, [idx])` — table manipulation
 - ✅ `all(tbl)` — iterator for sequential tables
 - ✅ `foreach(tbl, func)` — apply function to each element
 - ✅ `count(tbl, [val])` — count elements (or occurrences of a specific value)
 - ✅ `split(str, [sep], [convert_numbers])` — split string into table (number sep = char groups)
-- ✅ `btn(i, [p])` / `btnp(i, [p])` — button state (0-5: ⬅️➡️⬆️⬇️🅾️❎, players 0-7). `btnp` repeats after 15 frames, then every 4 frames. Custom delays: `poke(0x5f5c, initial_delay)` `poke(0x5f5d, repeat_delay)` (255 = never repeat, 0 = default).
+- ✅ `btn(i, [p])` / `btnp(i, [p])` — button state (0-5: ⬅️➡️⬆️⬇️🅾️❎, players 0-7; up to 32 buttons in v0.2.7+). `btnp` repeats after 15 frames, then every 4 frames. Custom delays: `poke(0x5f5c, initial_delay)` `poke(0x5f5d, repeat_delay)` (255 = never repeat, 0 = default).
 - ✅ `spr(n, x, y, [w, h], [flip_x], [flip_y])` / `sspr(sx, sy, sw, sh, dx, dy, [dw, dh], [flip_x], [flip_y])` — sprite drawing
 - ✅ `map(tile_x, tile_y, [sx, sy], [tile_w, tile_h], [layers])` / `mget(x, y)` / `mset(x, y, val)` / `fget(n, [f])` / `fset(n, [f], val)` — map/flags
 - ✅ `tline(x0, y0, x1, y1, mx, my, [mdx, mdy], [layers])` — textured line from map data (for pseudo-3D / Mode 7 effects). Call `tline(N)` with a single arg to set the number of fractional bits for map coordinates: `tline(16)` = pixel precision (default=3, i.e. tile precision where 0.125 = 1 pixel). Higher values = more precision for close-up textured surfaces.
@@ -146,7 +157,7 @@ project/
 - ✅ `pset(x, y, [col])` — set pixel
 - ✅ `pget()`, `sget()`, `sset()` — read/write individual pixels on screen/spritesheet
 - ✅ `fillp(pattern)` — 4×4 fill pattern for dithering effects. Fill patterns can also be embedded in any COL parameter via high bits (see "Inline Fill Patterns" below).
-- ✅ `cursor(x, y, [col])` / `color([col])` — set cursor position / default draw color. **Note:** `color()` with no args defaults to **6** (light gray), not 0.
+- ✅ `cursor(x, y, [col])` / `color([col])` — set cursor position / default draw color. `color()` with no args **returns the current draw color** (does not change it). The initial default draw color is **6** (light gray), not 0.
 - ✅ `sfx(n, [channel], [offset], [length])` — play sound effect. Returns channel index used (v0.2.7+). `music(n, [fade_len], [channel_mask])` — play music patterns.
 - ✅ `camera([x, y])` / `clip(x, y, w, h, [clip_previous])` — display control. When `clip_previous` is true, the new clip rect is intersected with the old one.
 - ✅ `pal(c0, c1, [p])` — swap color c0 for c1 in palette p (0=draw, 1=display, 2=secondary). Also accepts table form: `pal(tbl, [p])` to set multiple entries at once, e.g. `pal({[12]=9, [14]=8})`.
@@ -156,7 +167,7 @@ project/
 - ✅ `memcpy()`, `memset()`, `reload()`, `cstore()` — memory operations
 - ✅ `stat(n)` — system info (see stat reference below)
 - ✅ `t()` / `time()` — seconds elapsed since cart started
-- ✅ `cartdata(id)`, `dget(idx)`, `dset(idx, val)` — persistent save data (64 numbers)
+- ✅ `cartdata(id)`, `dget(idx)`, `dset(idx, val)` — persistent save data (64 numbers). In v0.2.7+, can switch between up to **4 different IDs per session**.
 - ✅ `cocreate()`, `coresume()`, `costatus()`, `yield()` — coroutines. **IMPORTANT:** Errors inside coroutines are silently swallowed! Always wrap: `assert(coresume(c))` to surface errors.
 - ✅ `printh(str, [filename], [overwrite], [save_to_desktop])` — debug print to host terminal or file. Use `"@clip"` as filename to write to clipboard.
 - ✅ `tostr(val, [format_flags])` / `tonum(val, [format_flags])` — with hex and integer modes
@@ -287,6 +298,37 @@ circfill(64,64,20, 0x114E.ABCD) -- pattern=0xABCD, colors=0x4E (brown+pink)
 -- bit 0x0400.0000 = apply secondary palette globally
 -- bit 0x0800.0000 = invert draw operation
 ```
+
+### P8SCII Control Codes Reference
+
+P8SCII control codes (0–15) can be embedded in `print()` strings using escape sequences. Effects reset after each `print()` call unless managed manually.
+
+| Escape | Code | Function | Parameters |
+|--------|------|----------|------------|
+| `\0` | 0 | Terminate string | — |
+| `\*` | 1 | Repeat next char N times | P0=count |
+| `\#` | 2 | Solid background color | P0=color |
+| `\-` | 3 | Horizontal cursor offset | P0=offset-16 |
+| `\|` | 4 | Vertical cursor offset | P0=offset-16 |
+| `\+` | 5 | Move cursor (x,y) | P0=dx-16, P1=dy-16 |
+| `\^` | 6 | Special commands (see below) | varies |
+| `\a` | 7 | Audio commands | varies |
+| `\b` | 8 | Backspace | — |
+| `\t` | 9 | Tab | — |
+| `\n` | 10 | Newline | — |
+| `\v` | 11 | Decorate previous char | varies |
+| `\f` | 12 | Set foreground color | P0=color (0-f) |
+| `\r` | 13 | Carriage return | — |
+| `\14` | 14 | Switch to custom font (0x5600) | — |
+| `\15` | 15 | Switch to default font | — |
+
+**`\^` Special commands (v0.2.7+):**
+- `\^o` + 2 hex chars — **outline** text (e.g., `?"\^o8fhello"` = outlined in color 8, fill f)
+- `\^u` — **underline** text
+- `\^w` — **wide** mode (double-width chars)
+- `\^t` — **tall** mode (double-height chars)
+- `\^r` + hex char — set **wrap width** for character wrapping (requires `poke(0x5f36, 0x80)`)
+- `\^;` / `\^,` — single-use spacing characters that respect padding
 
 ---
 
@@ -455,7 +497,7 @@ end
   - `4`: Brown, `5`: Dark Gray, `6`: Light Gray, `7`: White
   - `8`: Red, `9`: Orange, `a`: Yellow, `b`: Green
   - `c`: Blue, `d`: Indigo, `e`: Pink, `f`: Peach
-- **Extended palette** (colors 128-143): Available via `pal()` for screen display
+- **Extended palette** (colors 128-143): 16 additional dark/muted system colors. Access via display palette: `pal(c, 128+n, 1)` maps display color `c` to extended color `n`. Use `pal()` with no args to reset. Extended colors include darker variants of the default palette and additional hues.
 
 ---
 
@@ -474,6 +516,8 @@ __gfx__
 -- sprite sheet (128 lines × 128 hex chars)
 __gff__
 -- sprite flags (2 lines × 256 hex chars)
+__label__
+-- cartridge label image (128 lines × 128 hex chars, 0-f + g-v for extended colors)
 __map__
 -- map upper half (32 lines × 256 hex chars)
 __sfx__
@@ -511,6 +555,15 @@ Each line in `__gfx__` is a full 128-pixel row of the sheet. The first 8 chars o
 - Each hex pair = 8 flags for one sprite (bit 0 = flag 0, etc.)
 - Line 1: sprites 0-127, Line 2: sprites 128-255
 - Example: sprite 0 as solid (flag 0 set) = `01`, no flags = `00`
+
+### `__label__` — Cartridge Label Image
+
+- **128 lines**, each **128 hex characters** (same layout as `__gfx__`)
+- Each hex digit = 1 pixel color: `0`-`f` for default palette, `g`-`v` for extended palette colors
+- Appears between `__gff__` and `__map__` in the file
+- Created in PICO-8 by pressing **F7** or **Ctrl+7** while the game is running
+- Used as the cartridge cover image in `.p8.png` exports and Splore
+- Can be omitted if no label is needed
 
 ### `__map__` — Map Data (upper 32 rows)
 
