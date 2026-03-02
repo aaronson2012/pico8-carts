@@ -4,34 +4,6 @@
 >
 > **📝 LIVING DOCUMENT:** This file (`./GEMINI.md`) is a living reference. When you discover critical findings — undocumented API behavior, new pitfalls, corrected assumptions, or better patterns — you **MUST** update this file immediately. Keep it accurate and current. If something in this file is wrong, fix it and note the correction.
 
----
-
-## 🚨 RULE ZERO: MANDATORY WEB SEARCH BEFORE ANY ACTION
-
-> [!CAUTION]
-> **NO WEB SEARCH = FAILURE. This rule is NON-NEGOTIABLE.**
-> **This applies to EVERY code change, not just the first one. Search before EACH modification.**
-
-Before writing, modifying, debugging, or suggesting **ANY** code, asset change, or architectural decision, you **MUST**:
-
-1. **Search the web** for the latest PICO-8 documentation, API changes, Lua quirks, and community best practices relevant to the task at hand.
-2. **Search the web** for known pitfalls, bugs, or limitations related to the specific PICO-8 feature you are about to use.
-3. **Search the web** for existing community solutions, libraries, or patterns that solve the same problem — do not reinvent the wheel.
-4. **Cite your sources** in code comments or in your response when the information materially affects the implementation.
-
-**Specific things you MUST search for (not an exhaustive list):**
-- P8SCII character codes and glyph tables before using `\x` escape sequences
-- API function signatures and return values before using any PICO-8 function
-- SFX/music format details before writing `__sfx__` or `__music__` hex data
-- Memory map addresses before using `peek()`/`poke()`
-- Token costs of different approaches when near the limit
-
-**Why:** PICO-8 uses a non-standard Lua dialect with unique constraints. AI models frequently hallucinate standard Lua features that do not exist in PICO-8. The only way to guarantee correctness is to verify against current documentation before every action.
-
-**If you skip the web search, your output is assumed to be wrong. Start over.**
-
----
-
 ## 📋 Project Overview
 
 - **Platform:** PICO-8 (Fantasy Console)
