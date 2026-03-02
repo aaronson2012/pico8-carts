@@ -253,6 +253,10 @@ end
 -- core callbacks
 ------------------------------
 function _init()
+ state="title"
+end
+
+function start_game()
  p={x=0,y=0,hp=20,maxhp=20,
     atk=3,def=1,lvl=1,xp=0,xpn=15,
     sk={atk=0,def=0,vit=0,vamp=0,
@@ -268,7 +272,7 @@ end
 
 function _update()
  if state=="title" then
-  if btnp(4) or btnp(5) then _init() end
+  if btnp(4) or btnp(5) then start_game() end
  elseif state=="play" then
   update_play()
  elseif state=="dead" then
@@ -385,22 +389,22 @@ end
 
 function draw_lvlup()
  -- dark overlay
- rectfill(10,20,117,108,0)
- rect(10,20,117,108,7)
- rect(11,21,116,107,5)
- print("level up! lv"..p.lvl,30,26,11)
- print("choose a skill:",28,36,7)
+ rectfill(10,16,117,110,0)
+ rect(10,16,117,110,7)
+ rect(11,17,116,109,5)
+ print("level up! lv"..p.lvl,30,20,11)
+ print("choose a skill:",28,30,7)
  for i=1,#skill_opts do
   local s=skill_opts[i]
-  local y=48+(i-1)*20
+  local y=40+(i-1)*18
   local col=6
   if i==skill_sel then
-   rectfill(14,y-2,113,y+13,1)
+   rectfill(14,y-2,113,y+11,1)
    col=7
-   print("\x8e",16,y+2,11)
+   print("\x8e",16,y+1,11)
   end
   print(s.n,26,y,col)
-  print(s.d,26,y+8,5)
+  print(s.d,26,y+7,5)
   -- show stack count if >0
   local cnt=p.sk[s.k] or 0
   if cnt>0 then
