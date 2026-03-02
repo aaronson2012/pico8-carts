@@ -511,7 +511,7 @@ end
 > These are hard-won lessons from actual PICO-8 development. Do not ignore them.
 
 - **Text centering formula:** `x = (container_width - text_pixel_width) / 2 + container_x`. Regular chars are **4px wide**, wide glyphs (0x80-0xFF) are **8px wide**. Always calculate, never eyeball.
-- **P8SCII button glyph codes:** `\x8b`=⬅️ `\x91`=➡️ `\x83`=⬆️ `\x94`=⬇️ `\x8e`=🅾️ `\x8f`=❎ `\x97`=❎(alt). Use the correct directional glyphs for the context (e.g., ⬆️⬇️ for vertical menus, not ⬅️➡️).
+- **P8SCII button glyph codes (WEB-VERIFIED):** `\x83`=⬇️(131) `\x85`=⬆️(133) `\x87`=➡️(135) `\x8b`=⬅️(139) `\x8c`=❎(140) `\x8d`=🅾️(141). Use the correct directional glyphs for the context (e.g., `\x85\x83` for vertical menus = ⬆️⬇️).
 - **`sgn(0)` returns 1, not 0** — when using `sgn()` to compute direction for corridor carving or movement, check for the zero case first or use `min()/max()` to avoid infinite loops.
 - **Validate hex asset data with scripts** — never trust hand-written hex. Use Python to generate and `assert len(line) == expected` before inserting into `.p8` files.
 - **`_init()` is called automatically** — if your game has a title screen, `_init()` should set `state="title"`, not start gameplay. Use a separate function (e.g., `start_game()`) triggered by user input.

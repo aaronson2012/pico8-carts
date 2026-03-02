@@ -423,22 +423,26 @@ function _draw()
 end
 
 function draw_pause()
- rectfill(24,30,103,88,0)
- rect(24,30,103,88,7)
- rect(25,31,102,87,5)
- print("paused",52,34,7)
+ -- dark overlay
+ rectfill(20,28,107,92,0)
+ rect(20,28,107,92,7)
+ rect(21,29,106,91,5)
+ -- title
+ print("paused",50,32,7)
+ line(28,40,99,40,5)
+ -- options
  local opts={"resume","music: "..(music_on and "on" or "off"),"quit"}
  for i=1,3 do
-  local y=46+(i-1)*12
+  local y=44+(i-1)*14
   local col=6
   if i==pause_sel then
-   rectfill(28,y-1,99,y+7,1)
+   rectfill(24,y-1,103,y+7,1)
    col=7
-   print("\x8e",30,y,11)
+   print("\x87",26,y,11)
   end
-  print(opts[i],40,y,col)
+  print(opts[i],36,y,col)
  end
- print("\x83\x94:move \x97:select",26,82,5)
+ print("\x85\x83:move \x8c:select",28,86,5)
 end
 
 function draw_lvlup()
@@ -455,7 +459,7 @@ function draw_lvlup()
   if i==skill_sel then
    rectfill(14,y-2,113,y+11,1)
    col=7
-   print("\x8e",16,y+1,11)
+   print("\x87",16,y+1,11)
   end
   print(s.n,26,y,col)
   print(s.d,26,y+7,5)
@@ -465,18 +469,18 @@ function draw_lvlup()
    print("x"..cnt,100,y,9)
   end
  end
- print("\x97 select",46,100,6)
+ print("\x8c select",46,100,6)
 end
 
 function draw_title()
  cls(0)
- print("\x8e the depths \x8f",30,24,7)
+ print("\x8d the depths \x8c",30,24,7)
  print("a roguelike rpg",34,36,6)
  for i=0,15 do
   rectfill(i*8,56,i*8+6,62,i)
  end
- print("\x97 to start",42,76,11)
- print("\x8b\x91\x83\x94:move",38,92,5)
+ print("\x8c to start",42,76,11)
+ print("\x8b\x87\x85\x83:move",38,92,5)
  print("bump into foes to attack",16,100,5)
 end
 
@@ -486,7 +490,7 @@ function draw_dead()
  print("floor reached: "..flr_num,28,42,7)
  print("level: "..p.lvl,44,50,7)
  print("enemies slain!",30,58,6)
- print("\x97 to retry",40,80,11)
+ print("\x8c to retry",40,80,11)
 end
 
 function draw_game()
