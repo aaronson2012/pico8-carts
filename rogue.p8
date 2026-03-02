@@ -24,6 +24,21 @@ i_tpl={
  {"shield",10,"def",1}
 }
 
+-- skill definitions {name, desc, key}
+all_skills={
+ {n="might",d="+2 attack",k="atk"},
+ {n="armor",d="+2 defense",k="def"},
+ {n="vitality",d="+8 max hp",k="vit"},
+ {n="vampirism",d="heal on kill",k="vamp"},
+ {n="fury",d="crit chance",k="fury"},
+ {n="far sight",d="+2 view range",k="sight"},
+ {n="regen",d="heal each floor",k="regen"},
+ {n="dodge",d="evade attacks",k="dodge"}
+}
+-- skill selection state
+skill_opts={}
+skill_sel=0
+
 function msg(s)
  add(msgs,s)
  if #msgs>3 then deli(msgs,1) end
@@ -131,7 +146,7 @@ end
 ------------------------------
 function update_fov()
  lit={}
- local r=5
+ local r=5+p.sk.sight*2
  for dy=-r,r do
   for dx=-r,r do
    if dx*dx+dy*dy<=r*r then
@@ -150,22 +165,53 @@ end
 -- combat
 ------------------------------
 function do_attack(a,d)
+ -- fury: crit chance
  local dmg=max(1,a.atk-d.def+flr(rnd(3)))
+ if a==p and p.sk.fury>0 and rnd(100)<p.sk.fury*15 then
+  dmg=flr(dmg*2)
+  msg("critical!")
+ end
+ -- dodge: defender evades
+ if d==p and p.sk.dodge>0 and rnd(100)<p.sk.dodge*12 then
+  msg("dodged!")
+  return 0
+ end
  d.hp-=dmg
  return dmg
 end
 
 function check_lvlup()
- while p.xp>=p.xpn do
+ if p.xp>=p.xpn then
   p.lvl+=1
   p.xp-=p.xpn
   p.xpn=flr(p.xpn*1.5)
-  p.maxhp+=3
-  p.hp=min(p.hp+5,p.maxhp)
-  p.atk+=1 p.def+=1
-  msg("level up! lv"..p.lvl)
+  p.maxhp+=2
+  p.hp=min(p.hp+3,p.maxhp)
+  -- pick 3 random skills
+  skill_opts={}
+  local pool={}
+  for s in all(all_skills) do add(pool,s) end
+  for i=1,3 do
+   if #pool==0 then break end
+   local idx=1+flr(rnd(#pool))
+   add(skill_opts,pool[idx])
+   deli(pool,idx)
+  end
+  skill_sel=1
+  state="lvlup"
   sfx(5)
  end
+end
+
+function apply_skill(sk)
+ local k=sk.k
+ if k=="atk" then p.atk+=2
+ elseif k=="def" then p.def+=2
+ elseif k=="vit" then
+  p.maxhp+=8 p.hp=min(p.hp+8,p.maxhp)
+ end
+ p.sk[k]=(p.sk[k] or 0)+1
+ msg("learned "..sk.n.."!")
 end
 
 ------------------------------
@@ -208,7 +254,9 @@ end
 ------------------------------
 function _init()
  p={x=0,y=0,hp=20,maxhp=20,
-    atk=3,def=1,lvl=1,xp=0,xpn=15}
+    atk=3,def=1,lvl=1,xp=0,xpn=15,
+    sk={atk=0,def=0,vit=0,vamp=0,
+        fury=0,sight=0,regen=0,dodge=0}}
  flr_num=1
  msgs={}
  gen_dungeon()
@@ -225,6 +273,20 @@ function _update()
   update_play()
  elseif state=="dead" then
   if btnp(4) or btnp(5) then state="title" music(-1) end
+ elseif state=="lvlup" then
+  update_lvlup()
+ end
+end
+
+function update_lvlup()
+ if btnp(2) then skill_sel=max(1,skill_sel-1) sfx(0) end
+ if btnp(3) then skill_sel=min(#skill_opts,skill_sel+1) sfx(0) end
+ if btnp(4) or btnp(5) then
+  apply_skill(skill_opts[skill_sel])
+  state="play"
+  sfx(3)
+  -- check for another pending level up
+  check_lvlup()
  end
 end
 
@@ -249,6 +311,12 @@ function update_play()
    if e.hp<=0 then
     msg(e.n.." +"..e.xp.."xp")
     p.xp+=e.xp
+    -- vampirism: heal on kill
+    if p.sk.vamp>0 then
+     local heal=p.sk.vamp*2
+     p.hp=min(p.hp+heal,p.maxhp)
+     msg("+"..heal.." vamp")
+    end
     del(enemies,e)
     check_lvlup()
     sfx(2)
@@ -284,6 +352,12 @@ function update_play()
  -- stairs
  if grid[p.y][p.x]==t_stair then
   flr_num+=1
+  -- regen: heal on new floor
+  if p.sk.regen>0 then
+   local heal=p.sk.regen*3
+   p.hp=min(p.hp+heal,p.maxhp)
+   msg("+"..heal.." regen")
+  end
   gen_dungeon()
   msg("floor "..flr_num)
   sfx(3)
@@ -303,7 +377,37 @@ function _draw()
   draw_game()
  elseif state=="dead" then
   draw_dead()
+ elseif state=="lvlup" then
+  draw_game()
+  draw_lvlup()
  end
+end
+
+function draw_lvlup()
+ -- dark overlay
+ rectfill(10,20,117,108,0)
+ rect(10,20,117,108,7)
+ rect(11,21,116,107,5)
+ print("level up! lv"..p.lvl,30,26,11)
+ print("choose a skill:",28,36,7)
+ for i=1,#skill_opts do
+  local s=skill_opts[i]
+  local y=48+(i-1)*20
+  local col=6
+  if i==skill_sel then
+   rectfill(14,y-2,113,y+13,1)
+   col=7
+   print("\x8e",16,y+2,11)
+  end
+  print(s.n,26,y,col)
+  print(s.d,26,y+8,5)
+  -- show stack count if >0
+  local cnt=p.sk[s.k] or 0
+  if cnt>0 then
+   print("x"..cnt,100,y,9)
+  end
+ end
+ print("\x97 select",40,100,6)
 end
 
 function draw_title()
