@@ -13,15 +13,15 @@ flr_num=0
 
 -- enemy templates {name,spr,hp,atk,def,xp}
 e_tpl={
- {"slime",5,5,3,0,5},
- {"skel",6,8,4,2,10},
- {"demon",7,14,6,3,20}
+ {"slime",5,5,2,0,8},
+ {"skel",6,8,4,2,12},
+ {"demon",7,14,6,3,22}
 }
 -- item templates {name,spr,type,val}
 i_tpl={
- {"potion",8,"hp",3},
- {"sword",9,"atk",1},
- {"shield",10,"def",1}
+ {"potion",8,"hp",6},
+ {"sword",9,"atk",2},
+ {"shield",10,"def",2}
 }
 
 -- skill definitions {name, desc, key}
@@ -120,18 +120,22 @@ function gen_dungeon()
     y=r.y+1+flr(rnd(max(1,r.h-2))),
     s=et[2],n=et[1],
     hp=et[3]+flr(flr_num*1.5),
-    atk=et[4]+flr(flr_num*0.75),
+    atk=et[4]+flr(flr_num*0.5),
     def=et[5]+flr(flr_num/2),
     xp=et[6]+flr_num
    })
   end
  end
 
- -- spawn items
+ -- spawn items (potions weighted)
  items={}
  for r in all(rooms) do
-  if rnd(100)<30 then
-   local it=i_tpl[1+flr(rnd(#i_tpl))]
+  if rnd(100)<45 then
+   local ri=rnd(100)
+   local it
+   if ri<40 then it=i_tpl[1]
+   elseif ri<70 then it=i_tpl[2]
+   else it=i_tpl[3] end
    add(items,{
     x=r.x+1+flr(rnd(max(1,r.w-2))),
     y=r.y+1+flr(rnd(max(1,r.h-2))),
@@ -189,8 +193,8 @@ function check_lvlup()
   p.lvl+=1
   p.xp-=p.xpn
   p.xpn=flr(p.xpn*1.7)
-  p.maxhp+=1
-  p.hp=min(p.hp+2,p.maxhp)
+  p.maxhp+=3
+  p.hp=min(p.hp+4,p.maxhp)
   -- pick 3 random skills
   skill_opts={}
   local pool={}
@@ -262,7 +266,7 @@ end
 
 function start_game()
  p={x=0,y=0,hp=15,maxhp=15,
-    atk=2,def=0,lvl=1,xp=0,xpn=20,
+    atk=4,def=0,lvl=1,xp=0,xpn=20,
     sk={atk=0,def=0,vit=0,vamp=0,
         fury=0,sight=0,regen=0,dodge=0}}
  flr_num=1
@@ -338,7 +342,7 @@ function update_play()
  if nx<0 or nx>=mw or ny<0 or ny>=mh then return end
  if grid[ny][nx]==t_wall then return end
 
- -- bump attack
+ -- bump attack (player strikes first)
  for e in all(enemies) do
   if e.x==nx and e.y==ny then
    local dmg=do_attack(p,e)
@@ -356,8 +360,9 @@ function update_play()
     del(enemies,e)
     check_lvlup()
     sfx(2)
+   else
+    update_enemies()
    end
-   update_enemies()
    update_fov()
    return
   end
@@ -438,11 +443,11 @@ function draw_pause()
   if i==pause_sel then
    rectfill(24,y-1,103,y+7,1)
    col=7
-   print("\x87",26,y,11)
+   print("",26,y,11)
   end
   print(opts[i],36,y,col)
  end
- print("\x85\x83:move \x8c:select",28,86,5)
+ print(":move :select",28,86,5)
 end
 
 function draw_lvlup()
@@ -459,7 +464,7 @@ function draw_lvlup()
   if i==skill_sel then
    rectfill(14,y-2,113,y+11,1)
    col=7
-   print("\x87",16,y+1,11)
+   print("",16,y+1,11)
   end
   print(s.n,26,y,col)
   print(s.d,26,y+7,5)
@@ -469,18 +474,18 @@ function draw_lvlup()
    print("x"..cnt,100,y,9)
   end
  end
- print("\x8c select",46,100,6)
+ print(" select",46,100,6)
 end
 
 function draw_title()
  cls(0)
- print("\x8d the depths \x8c",30,24,7)
+ print(" the depths ",30,24,7)
  print("a roguelike rpg",34,36,6)
  for i=0,15 do
   rectfill(i*8,56,i*8+6,62,i)
  end
- print("\x8c to start",42,76,11)
- print("\x8b\x87\x85\x83:move",38,92,5)
+ print(" to start",42,76,11)
+ print(":move",38,92,5)
  print("bump into foes to attack",16,100,5)
 end
 
@@ -490,7 +495,7 @@ function draw_dead()
  print("floor reached: "..flr_num,28,42,7)
  print("level: "..p.lvl,44,50,7)
  print("enemies slain!",30,58,6)
- print("\x8c to retry",40,80,11)
+ print(" to retry",40,80,11)
 end
 
 function draw_game()
