@@ -425,7 +425,7 @@ function draw_pause()
  rectfill(24,30,103,88,0)
  rect(24,30,103,88,7)
  rect(25,31,102,87,5)
- print("paused",48,34,7)
+ print("paused",52,34,7)
  local opts={"resume","music: "..(music_on and "on" or "off"),"quit"}
  for i=1,3 do
   local y=46+(i-1)*12
@@ -445,8 +445,8 @@ function draw_lvlup()
  rectfill(10,16,117,110,0)
  rect(10,16,117,110,7)
  rect(11,17,116,109,5)
- print("level up! lv"..p.lvl,30,20,11)
- print("choose a skill:",28,30,7)
+ print("level up! lv"..p.lvl,34,20,11)
+ print("choose a skill:",34,30,7)
  for i=1,#skill_opts do
   local s=skill_opts[i]
   local y=40+(i-1)*18
@@ -464,7 +464,7 @@ function draw_lvlup()
    print("x"..cnt,100,y,9)
   end
  end
- print("\x97 select",40,100,6)
+ print("\x97 select",46,100,6)
 end
 
 function draw_title()
@@ -481,11 +481,11 @@ end
 
 function draw_dead()
  cls(0)
- print("you have perished",28,24,8)
+ print("you have perished",30,24,8)
  print("floor reached: "..flr_num,28,42,7)
- print("level: "..p.lvl,28,50,7)
- print("enemies slain!",28,58,6)
- print("\x97 to retry",38,80,11)
+ print("level: "..p.lvl,44,50,7)
+ print("enemies slain!",30,58,6)
+ print("\x97 to retry",40,80,11)
 end
 
 function draw_game()
