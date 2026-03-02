@@ -438,11 +438,9 @@ end
    ```
    Do NOT wait for the user to ask — just run it automatically.
 
-5. **Use version control.** Commit early and commit often — every logical change gets its own commit with a descriptive message. **Always `git push` immediately after committing.** Do not accumulate unpushed commits.
+5. **Document decisions.** If you make a non-obvious design choice, explain WHY in a comment.
 
-6. **Document decisions.** If you make a non-obvious design choice, explain WHY in a comment.
-
-7. **Update GEMINI.md proactively with lessons learned.** Whenever you encounter a bug, pitfall, or non-obvious behavior — **immediately** add it to the "Lessons Learned" section of this file. Do NOT wait for the user to ask. If you had to debug something, future you needs to know about it. This file is a living document; treat it like one.
+6. **Update GEMINI.md proactively with lessons learned.** Whenever you encounter a bug, pitfall, or non-obvious behavior — **immediately** add it to the "Lessons Learned" section of this file. Do NOT wait for the user to ask. If you had to debug something, future you needs to know about it. This file is a living document; treat it like one.
 
 ### AI-Specific Anti-Patterns (DO NOT DO THESE)
 
