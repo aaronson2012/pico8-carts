@@ -10,13 +10,6 @@ mw,mh=32,32
 state="title"
 msgs={}
 flr_num=0
--- p8scii glyphs
-g_dn=chr(146)
-g_up=chr(145)
-g_rt=chr(148)
-g_lt=chr(147)
-g_x=chr(151)
-g_o=chr(150)
 
 -- enemy templates {name,spr,hp,atk,def,xp}
 e_tpl={
@@ -450,11 +443,11 @@ function draw_pause()
   if i==pause_sel then
    rectfill(24,y-1,103,y+7,1)
    col=7
-   print(g_rt,26,y,11)
+   print("\x91",26,y,11)
   end
   print(opts[i],36,y,col)
  end
- print(g_up..g_dn..":move "..g_x..":select",28,86,5)
+ print("\x83\x94:move \x97:select",28,86,5)
 end
 
 function draw_lvlup()
@@ -471,7 +464,7 @@ function draw_lvlup()
   if i==skill_sel then
    rectfill(14,y-2,113,y+11,1)
    col=7
-   print(g_rt,16,y+1,11)
+   print("\x91",16,y+1,11)
   end
   print(s.n,26,y,col)
   print(s.d,26,y+7,5)
@@ -481,18 +474,18 @@ function draw_lvlup()
    print("x"..cnt,100,y,9)
   end
  end
- print(g_x.." select",46,100,6)
+ print("\x97 select",46,100,6)
 end
 
 function draw_title()
  cls(0)
- print(g_o.." the depths "..g_x,30,24,7)
+ print("\x8e the depths \x8f",30,24,7)
  print("a roguelike rpg",34,36,6)
  for i=0,15 do
   rectfill(i*8,56,i*8+6,62,i)
  end
- print(g_x.." to start",42,76,11)
- print(g_lt..g_rt..g_up..g_dn..":move",38,92,5)
+ print("\x97 to start",42,76,11)
+ print("\x8b\x91\x83\x94:move",38,92,5)
  print("bump into foes to attack",16,100,5)
 end
 
@@ -502,7 +495,7 @@ function draw_dead()
  print("floor reached: "..flr_num,28,42,7)
  print("level: "..p.lvl,44,50,7)
  print("enemies slain!",30,58,6)
- print(g_x.." to retry",40,80,11)
+ print("\x97 to retry",40,80,11)
 end
 
 function draw_game()
