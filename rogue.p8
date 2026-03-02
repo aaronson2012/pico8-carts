@@ -38,6 +38,9 @@ all_skills={
 -- skill selection state
 skill_opts={}
 skill_sel=0
+-- pause state
+music_on=true
+pause_sel=1
 
 function msg(s)
  add(msgs,s)
@@ -267,7 +270,7 @@ function start_game()
  update_fov()
  msg("welcome to the depths!")
  state="play"
- music(0)
+ if music_on then music(0) end
 end
 
 function _update()
@@ -279,6 +282,8 @@ function _update()
   if btnp(4) or btnp(5) then state="title" music(-1) end
  elseif state=="lvlup" then
   update_lvlup()
+ elseif state=="pause" then
+  update_pause()
  end
 end
 
@@ -294,7 +299,33 @@ function update_lvlup()
  end
 end
 
+function update_pause()
+ if btnp(2) then pause_sel=max(1,pause_sel-1) sfx(0) end
+ if btnp(3) then pause_sel=min(3,pause_sel+1) sfx(0) end
+ if btnp(4) or btnp(5) then
+  if pause_sel==1 then
+   -- resume
+   state="play" sfx(0)
+  elseif pause_sel==2 then
+   -- toggle music
+   music_on=not music_on
+   if music_on then music(0) else music(-1) end
+   sfx(3)
+  elseif pause_sel==3 then
+   -- quit to title
+   state="title" music(-1)
+  end
+ end
+end
+
 function update_play()
+ -- pause check
+ if btnp(4) then
+  pause_sel=1
+  state="pause"
+  sfx(0)
+  return
+ end
  local dx,dy=0,0
  if btnp(0) then dx=-1
  elseif btnp(1) then dx=1
@@ -384,7 +415,29 @@ function _draw()
  elseif state=="lvlup" then
   draw_game()
   draw_lvlup()
+ elseif state=="pause" then
+  draw_game()
+  draw_pause()
  end
+end
+
+function draw_pause()
+ rectfill(24,30,103,88,0)
+ rect(24,30,103,88,7)
+ rect(25,31,102,87,5)
+ print("paused",48,34,7)
+ local opts={"resume","music: "..(music_on and "on" or "off"),"quit"}
+ for i=1,3 do
+  local y=46+(i-1)*12
+  local col=6
+  if i==pause_sel then
+   rectfill(28,y-1,99,y+7,1)
+   col=7
+   print("\x8e",30,y,11)
+  end
+  print(opts[i],40,y,col)
+ end
+ print("\x8b\x91:move \x97:select",22,82,5)
 end
 
 function draw_lvlup()
