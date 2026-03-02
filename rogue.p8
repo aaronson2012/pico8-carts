@@ -11,12 +11,12 @@ state="title"
 msgs={}
 flr_num=0
 -- p8scii glyphs
-g_dn=chr(131)
-g_up=chr(133)
-g_rt=chr(135)
-g_lt=chr(139)
-g_x=chr(140)
-g_o=chr(141)
+g_dn=chr(146)
+g_up=chr(145)
+g_rt=chr(148)
+g_lt=chr(147)
+g_x=chr(151)
+g_o=chr(150)
 
 -- enemy templates {name,spr,hp,atk,def,xp}
 e_tpl={
