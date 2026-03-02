@@ -13,22 +13,22 @@ flr_num=0
 
 -- enemy templates {name,spr,hp,atk,def,xp}
 e_tpl={
- {"slime",5,4,2,0,5},
- {"skel",6,6,3,1,10},
- {"demon",7,10,5,2,20}
+ {"slime",5,5,3,0,5},
+ {"skel",6,8,4,2,10},
+ {"demon",7,14,6,3,20}
 }
 -- item templates {name,spr,type,val}
 i_tpl={
- {"potion",8,"hp",5},
+ {"potion",8,"hp",3},
  {"sword",9,"atk",1},
  {"shield",10,"def",1}
 }
 
 -- skill definitions {name, desc, key}
 all_skills={
- {n="might",d="+2 attack",k="atk"},
- {n="armor",d="+2 defense",k="def"},
- {n="vitality",d="+8 max hp",k="vit"},
+ {n="might",d="+1 attack",k="atk"},
+ {n="armor",d="+1 defense",k="def"},
+ {n="vitality",d="+5 max hp",k="vit"},
  {n="vampirism",d="heal on kill",k="vamp"},
  {n="fury",d="crit chance",k="fury"},
  {n="far sight",d="+2 view range",k="sight"},
@@ -108,20 +108,21 @@ function gen_dungeon()
 
  -- spawn enemies
  enemies={}
- for i=2,#rooms-1 do
+ for i=2,#rooms do
   local r=rooms[i]
-  local ne=1+flr(rnd(2))
+  local ne=1+flr(rnd(1+flr(flr_num/3)))
+  if ne>3 then ne=3 end
   for j=1,ne do
-   local tier=min(3,1+flr(rnd(1+flr_num/2)))
+   local tier=min(3,1+flr(rnd(1+flr_num/3)))
    local et=e_tpl[tier]
    add(enemies,{
     x=r.x+1+flr(rnd(max(1,r.w-2))),
     y=r.y+1+flr(rnd(max(1,r.h-2))),
     s=et[2],n=et[1],
-    hp=et[3]+flr_num,
-    atk=et[4]+flr(flr_num/2),
-    def=et[5]+flr(flr_num/3),
-    xp=et[6]
+    hp=et[3]+flr(flr_num*1.5),
+    atk=et[4]+flr(flr_num*0.75),
+    def=et[5]+flr(flr_num/2),
+    xp=et[6]+flr_num
    })
   end
  end
@@ -129,7 +130,7 @@ function gen_dungeon()
  -- spawn items
  items={}
  for r in all(rooms) do
-  if rnd(100)<40 then
+  if rnd(100)<30 then
    local it=i_tpl[1+flr(rnd(#i_tpl))]
    add(items,{
     x=r.x+1+flr(rnd(max(1,r.w-2))),
@@ -187,9 +188,9 @@ function check_lvlup()
  if p.xp>=p.xpn then
   p.lvl+=1
   p.xp-=p.xpn
-  p.xpn=flr(p.xpn*1.5)
-  p.maxhp+=2
-  p.hp=min(p.hp+3,p.maxhp)
+  p.xpn=flr(p.xpn*1.7)
+  p.maxhp+=1
+  p.hp=min(p.hp+2,p.maxhp)
   -- pick 3 random skills
   skill_opts={}
   local pool={}
@@ -208,10 +209,10 @@ end
 
 function apply_skill(sk)
  local k=sk.k
- if k=="atk" then p.atk+=2
- elseif k=="def" then p.def+=2
+ if k=="atk" then p.atk+=1
+ elseif k=="def" then p.def+=1
  elseif k=="vit" then
-  p.maxhp+=8 p.hp=min(p.hp+8,p.maxhp)
+  p.maxhp+=5 p.hp=min(p.hp+5,p.maxhp)
  end
  p.sk[k]=(p.sk[k] or 0)+1
  msg("learned "..sk.n.."!")
@@ -260,8 +261,8 @@ function _init()
 end
 
 function start_game()
- p={x=0,y=0,hp=20,maxhp=20,
-    atk=3,def=1,lvl=1,xp=0,xpn=15,
+ p={x=0,y=0,hp=15,maxhp=15,
+    atk=2,def=0,lvl=1,xp=0,xpn=20,
     sk={atk=0,def=0,vit=0,vamp=0,
         fury=0,sight=0,regen=0,dodge=0}}
  flr_num=1
