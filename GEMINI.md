@@ -470,6 +470,8 @@ end
 
 6. **Document decisions.** If you make a non-obvious design choice, explain WHY in a comment.
 
+7. **Update GEMINI.md proactively with lessons learned.** Whenever you encounter a bug, pitfall, or non-obvious behavior — **immediately** add it to the "Lessons Learned" section of this file. Do NOT wait for the user to ask. If you had to debug something, future you needs to know about it. This file is a living document; treat it like one.
+
 ### AI-Specific Anti-Patterns (DO NOT DO THESE)
 
 > [!CAUTION]
