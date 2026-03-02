@@ -469,14 +469,14 @@ end
 
 function draw_title()
  cls(0)
- print("\x8e the depths \x8f",28,24,7)
- print("a roguelike rpg",28,36,6)
+ print("\x8e the depths \x8f",30,24,7)
+ print("a roguelike rpg",34,36,6)
  for i=0,15 do
   rectfill(i*8,56,i*8+6,62,i)
  end
- print("\x97 to start",38,76,11)
- print("\x8b\x91\x83\x94:move",28,92,5)
- print("bump into foes to attack",12,100,5)
+ print("\x97 to start",42,76,11)
+ print("\x8b\x91\x83\x94:move",38,92,5)
+ print("bump into foes to attack",16,100,5)
 end
 
 function draw_dead()
