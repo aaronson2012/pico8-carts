@@ -452,9 +452,15 @@ end
    - Check that existing functionality isn't broken
    - Report the token count using `info` in the PICO-8 console if applicable
 
-4. **Use version control.** Commit early and commit often — every logical change gets its own commit with a descriptive message. **Always `git push` immediately after committing.** Do not accumulate unpushed commits.
+4. **Run the game after every code change.** After committing and pushing, **ALWAYS** relaunch the game for the user:
+   ```bash
+   pkill -f pico8 2>/dev/null; sleep 1; pico8 -run /path/to/cart.p8
+   ```
+   Do NOT wait for the user to ask — just run it automatically.
 
-5. **Document decisions.** If you make a non-obvious design choice, explain WHY in a comment.
+5. **Use version control.** Commit early and commit often — every logical change gets its own commit with a descriptive message. **Always `git push` immediately after committing.** Do not accumulate unpushed commits.
+
+6. **Document decisions.** If you make a non-obvious design choice, explain WHY in a comment.
 
 ### AI-Specific Anti-Patterns (DO NOT DO THESE)
 
@@ -471,6 +477,8 @@ end
 - ❌ **Do NOT rewrite existing working code** unless specifically asked to
 - ⚠️ **Be careful when generating pixel art / sprite data** — use the `.p8` file format reference below and document your design intent clearly in comments. For complex art, describe what each sprite should look like before writing hex data.
 - ❌ **Do NOT hallucinate PICO-8 API functions** — if you're unsure a function exists, SEARCH THE WEB FIRST
+- ❌ **Do NOT hand-write hex asset data without validation** — always use a Python script to generate and verify `__gfx__` (128 chars/line), `__sfx__` (168 chars/line), `__gff__` (256 chars/line). Stray spaces or wrong lengths will corrupt data silently.
+- ❌ **Do NOT use `_init()` for gameplay setup if the game has a title screen** — PICO-8 calls `_init()` automatically on load. Put title state in `_init()`, use a separate `start_game()` function for gameplay initialization.
 
 ### AI-Specific Best Practices (DO THESE)
 
@@ -486,6 +494,18 @@ end
 - ✅ **Generate complete assets** — write sprite, map, SFX, and music data using the `.p8` file format documented below
 - ✅ **Comment sprite designs** — before each `__gfx__` block, describe what each sprite is in comments
 - ✅ **Wrap `coresume()` in `assert()`** — coroutine errors are silently swallowed otherwise
+
+### Lessons Learned (from building games)
+
+> [!NOTE]
+> These are hard-won lessons from actual PICO-8 development. Do not ignore them.
+
+- **Text centering formula:** `x = (container_width - text_pixel_width) / 2 + container_x`. Regular chars are **4px wide**, wide glyphs (0x80-0xFF) are **8px wide**. Always calculate, never eyeball.
+- **P8SCII button glyph codes:** `\x8b`=⬅️ `\x91`=➡️ `\x83`=⬆️ `\x94`=⬇️ `\x8e`=🅾️ `\x8f`=❎ `\x97`=❎(alt). Use the correct directional glyphs for the context (e.g., ⬆️⬇️ for vertical menus, not ⬅️➡️).
+- **`sgn(0)` returns 1, not 0** — when using `sgn()` to compute direction for corridor carving or movement, check for the zero case first or use `min()/max()` to avoid infinite loops.
+- **Validate hex asset data with scripts** — never trust hand-written hex. Use Python to generate and `assert len(line) == expected` before inserting into `.p8` files.
+- **`_init()` is called automatically** — if your game has a title screen, `_init()` should set `state="title"`, not start gameplay. Use a separate function (e.g., `start_game()`) triggered by user input.
+- **Dungeon corridors with `min()`/`max()`** — instead of `while` loops with `sgn()`, carve corridors with `for x=min(ax,bx),max(ax,bx)` to avoid the `sgn(0)` pitfall entirely.
 
 ---
 
