@@ -410,7 +410,7 @@ end
    - Check that existing functionality isn't broken
    - Report the token count using `info` in the PICO-8 console if applicable
 
-4. **Use version control.** Commit frequently with descriptive messages.
+4. **Use version control.** Commit early and commit often — every logical change gets its own commit with a descriptive message. **Always `git push` immediately after committing.** Do not accumulate unpushed commits.
 
 5. **Document decisions.** If you make a non-obvious design choice, explain WHY in a comment.
 
