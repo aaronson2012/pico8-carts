@@ -437,7 +437,7 @@ function draw_pause()
   end
   print(opts[i],40,y,col)
  end
- print("\x8b\x91:move \x97:select",22,82,5)
+ print("\x83\x94:move \x97:select",22,82,5)
 end
 
 function draw_lvlup()
